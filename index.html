@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OLIVE AI</title>
+  <meta name="description" content="OLIVE AI — an interactive literacy and language learning platform with story generation, pronunciation coaching, grammar play, analytics, and pitch deck mode." />
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&f[]=general-sans@500,600,700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" defer></script>
+  <style>
+    :root, [data-theme="light"] {
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem; --space-16: 4rem; --space-20: 5rem;
+      --color-bg: #f7f6f2; --color-surface:#f9f8f5; --color-surface-2:#fbfbf9; --color-surface-offset:#f3f0ec; --color-surface-dynamic:#e6e4df; --color-border:#d4d1ca; --color-divider:#dcd9d5; --color-surface-glass:rgba(249,248,245,.86);
+      --color-text:#28251d; --color-text-muted:#6d6a63; --color-text-faint:#9d9990; --color-text-inverse:#f9f8f4;
+      --color-primary:#01696f; --color-primary-hover:#0c4e54; --color-primary-highlight:#cedcd8;
+      --color-success:#437a22; --color-warning:#da7101; --color-error:#a13544; --color-blue:#006494; --color-purple:#7a39bb; --color-gold:#d19900;
+      --radius-sm:0.375rem; --radius-md:0.625rem; --radius-lg:0.875rem; --radius-xl:1.25rem; --radius-full:9999px;
+      --shadow-sm:0 1px 2px rgba(22,22,22,.08); --shadow-md:0 10px 30px rgba(22,22,22,.10); --shadow-lg:0 20px 60px rgba(22,22,22,.16);
+      --font-body:'Satoshi','Inter',sans-serif; --font-display:'General Sans','Satoshi',sans-serif;
+      --transition:180ms cubic-bezier(0.16,1,0.3,1);
+      --content-wide:min(1240px, calc(100vw - 2rem));
+    }
+    [data-theme="dark"] {
+      --color-bg:#0f1216; --color-surface:#151a20; --color-surface-2:#1a2027; --color-surface-offset:#11161c; --color-surface-dynamic:#252c36; --color-border:#2c3440; --color-divider:#212933;
+      --color-text:#ecf1f6; --color-text-muted:#aab4bf; --color-text-faint:#6d7782; --color-text-inverse:#0d1116;
+      --color-primary:#60c1c8; --color-primary-hover:#8ad7db; --color-primary-highlight:rgba(96,193,200,.12);
+      --color-success:#7fcc64; --color-warning:#ffb451; --color-error:#f2798d; --color-blue:#6eb6f2; --color-purple:#b995ff; --color-gold:#f2c863;
+      --shadow-sm:0 1px 2px rgba(0,0,0,.24); --shadow-md:0 10px 30px rgba(0,0,0,.28); --shadow-lg:0 20px 60px rgba(0,0,0,.4);
+      --color-surface-glass:rgba(21,26,32,.74);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+    body{font-family:var(--font-body);font-size:var(--text-base);color:var(--color-text);background:
+      radial-gradient(circle at top right, rgba(96,193,200,.10), transparent 28%),
+      radial-gradient(circle at left 20%, rgba(110,182,242,.08), transparent 24%),
+      var(--color-bg);line-height:1.6}
+    img,svg{display:block;max-width:100%}
+    button,input,select,textarea{font:inherit;color:inherit}
+    button{cursor:pointer;border:none;background:none}
+    a{text-decoration:none;color:inherit}
+    :focus-visible{outline:2px solid var(--color-primary);outline-offset:3px;border-radius:var(--radius-sm)}
+    .skip-link{position:absolute;left:var(--space-4);top:-50px;background:var(--color-primary);color:var(--color-text-inverse);padding:var(--space-2) var(--space-4);border-radius:var(--radius-full);z-index:200}
+    .skip-link:focus{top:var(--space-4)}
+    #bg3d{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+    .app-shell{position:relative;z-index:1;display:grid;grid-template-columns:300px 1fr;min-height:100dvh}
+    .sidebar{position:sticky;top:0;height:100dvh;padding:var(--space-6);background:rgba(17,22,28,.8);backdrop-filter:blur(20px);border-right:1px solid var(--color-border);overflow:auto}
+    .brand{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-8)}
+    .brand-mark{width:44px;height:44px;padding:10px;border-radius:14px;background:linear-gradient(135deg,var(--color-primary-highlight),rgba(96,193,200,.02));color:var(--color-primary)}
+    .brand h1{font-family:var(--font-display);font-size:var(--text-lg);line-height:1.1;letter-spacing:-.01em}
+    .brand p{font-size:var(--text-xs);color:var(--color-text-muted);margin-top:2px}
+    .nav-group{display:grid;gap:var(--space-2)}
+    .nav-link{display:flex;align-items:center;gap:var(--space-3);padding:0.85rem 1rem;border-radius:var(--radius-lg);font-size:var(--text-sm);color:var(--color-text-muted);border:1px solid transparent;transition:all var(--transition)}
+    .nav-link:hover,.nav-link.active{background:var(--color-surface-2);border-color:var(--color-border);color:var(--color-text)}
+    .sidebar-actions{display:grid;gap:var(--space-3);margin-top:var(--space-8)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);min-height:44px;padding:0.8rem 1rem;border-radius:var(--radius-lg);font-size:var(--text-sm);font-weight:700;transition:all var(--transition)}
+    .btn-primary{background:var(--color-primary);color:var(--color-text-inverse);box-shadow:var(--shadow-sm)}
+    .btn-primary:hover{background:var(--color-primary-hover);transform:translateY(-1px);box-shadow:0 10px 24px rgba(96,193,200,.28)}
+    .btn-secondary{background:var(--color-surface-2);border:1px solid var(--color-border);color:var(--color-text)}
+    .btn-ghost{background:transparent;border:1px dashed var(--color-border);color:var(--color-text-muted)}
+    .main{min-width:0}
+    .topbar{position:sticky;top:0;z-index:80;display:flex;align-items:center;justify-content:space-between;padding:var(--space-4) var(--space-6);background:rgba(15,18,22,.75);backdrop-filter:blur(16px);border-bottom:1px solid var(--color-border)}
+    .topbar h2{font-size:var(--text-xl);font-family:var(--font-display);line-height:1.1}
+    .topbar p{font-size:var(--text-sm);color:var(--color-text-muted)}
+    .topbar-actions{display:flex;gap:var(--space-3);align-items:center}
+    .icon-btn{width:44px;height:44px;border-radius:var(--radius-full);background:var(--color-surface-2);border:1px solid var(--color-border);display:grid;place-items:center}
+    .content{width:var(--content-wide);margin:0 auto;padding:var(--space-6) 0 var(--space-20);display:grid;gap:var(--space-6)}
+    .hero{display:grid;grid-template-columns:1.15fr .85fr;gap:var(--space-6);align-items:stretch}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,.04), transparent), var(--color-surface-glass);backdrop-filter:blur(22px) saturate(140%);-webkit-backdrop-filter:blur(22px) saturate(140%);border:1px solid var(--color-border);border-radius:var(--radius-xl);box-shadow:var(--shadow-md);animation:card-rise 640ms cubic-bezier(0.16,1,0.3,1) both}
+    .feature-grid .card:nth-child(2),.coach-grid .card:nth-child(2),.grammar-grid .card:nth-child(2),.dialogue-grid .card:nth-child(2),.analytics-grid .card:nth-child(2){animation-delay:60ms}
+    .analytics-grid .card:nth-child(3){animation-delay:120ms}
+    @keyframes card-rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .hero-panel{padding:var(--space-8);display:flex;flex-direction:column;justify-content:space-between;min-height:360px}
+    .eyebrow{display:inline-flex;align-items:center;gap:var(--space-2);padding:0.4rem 0.7rem;border-radius:var(--radius-full);font-size:var(--text-xs);letter-spacing:.08em;text-transform:uppercase;background:var(--color-primary-highlight);color:var(--color-primary);font-weight:800}
+    .hero-copy h3{font-family:var(--font-display);font-size:clamp(2rem,1.4rem + 2vw,3.4rem);line-height:1.02;max-width:12ch;margin:var(--space-4) 0}
+    .hero-copy p{max-width:58ch;color:var(--color-text-muted)}
+    .hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4);margin-top:var(--space-8)}
+    .stat{padding:var(--space-4);border-radius:var(--radius-lg);background:var(--color-surface-2);border:1px solid var(--color-border)}
+    .stat strong{display:block;font-size:var(--text-lg);font-variant-numeric:tabular-nums}
+    .stat span{font-size:var(--text-xs);color:var(--color-text-muted)}
+    .feature-grid,.analytics-grid,.coach-grid,.grammar-grid,.dialogue-grid,.slides-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--space-6)}
+    .span-4{grid-column:span 4}.span-5{grid-column:span 5}.span-6{grid-column:span 6}.span-7{grid-column:span 7}.span-8{grid-column:span 8}.span-12{grid-column:1/-1}
+    .panel{padding:var(--space-6)}
+    .panel h3{font-size:var(--text-lg);font-family:var(--font-display);margin-bottom:var(--space-2)}
+    .panel p.lead{font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-5)}
+    .pill-row,.word-bank,.scenario-row,.metric-row{display:flex;flex-wrap:wrap;gap:var(--space-2)}
+    .pill,.token,.scenario-btn{padding:0.55rem 0.85rem;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface-2);font-size:var(--text-sm)}
+    .token{cursor:pointer}.token.correct{background:rgba(127,204,100,.15);border-color:rgba(127,204,100,.5);color:var(--color-success)}.token.wrong{background:rgba(242,121,141,.14);border-color:rgba(242,121,141,.45);color:var(--color-error)}
+    .story-box,.feedback-box,.chat-log,.slides-stage,.explain-box,.drop-zone{padding:var(--space-5);border-radius:var(--radius-lg);background:var(--color-surface-2);border:1px solid var(--color-border)}
+    .story-box{display:grid;gap:var(--space-4);min-height:220px}
+    .story-text{display:flex;flex-wrap:wrap;gap:0.4rem .5rem;align-content:start}
+    .story-word{padding:0.15rem 0.35rem;border-radius:0.4rem;cursor:pointer;transition:background var(--transition), color var(--transition)}
+    .story-word:hover,.story-word.active{background:var(--color-primary-highlight);color:var(--color-primary)}
+    .story-inspector dl{display:grid;grid-template-columns:max-content 1fr;gap:0.35rem 0.8rem;font-size:var(--text-sm)}
+    .story-inspector dt{color:var(--color-text-muted)}
+    .controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-3);margin-bottom:var(--space-5)}
+    select,input[type="text"]{min-height:46px;padding:0.8rem 0.9rem;border-radius:var(--radius-lg);border:1px solid var(--color-border);background:var(--color-surface-2);width:100%}
+    .score-ring{width:130px;height:130px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--color-primary) calc(var(--score,78) * 1%), var(--color-surface-dynamic) 0);padding:10px;margin:auto}
+    .score-ring span{width:100%;height:100%;display:grid;place-items:center;border-radius:50%;background:var(--color-surface);font-size:var(--text-lg);font-weight:800}
+    .drop-zone{min-height:110px;display:flex;flex-wrap:wrap;gap:var(--space-2);align-content:flex-start}
+    .grammar-answer{min-height:84px}
+    .small-label{font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-faint);font-weight:800;margin-bottom:var(--space-3)}
+    .chat-log{display:grid;gap:var(--space-4);min-height:320px;max-height:400px;overflow:auto}
+    .bubble{padding:var(--space-4);border-radius:var(--radius-lg);max-width:85%}
+    .bubble.user{justify-self:end;background:rgba(96,193,200,.14);border:1px solid rgba(96,193,200,.3)}
+    .bubble.ai{justify-self:start;background:var(--color-surface);border:1px solid var(--color-border)}
+    .bubble small{display:block;color:var(--color-text-muted);font-size:var(--text-xs);margin-top:var(--space-2)}
+    .chat-controls{display:grid;grid-template-columns:1fr auto auto;gap:var(--space-3);margin-top:var(--space-4)}
+    .metric{padding:var(--space-4);border-radius:var(--radius-lg);background:var(--color-surface-2);border:1px solid var(--color-border)}
+    .metric strong{display:block;font-size:var(--text-lg);font-variant-numeric:tabular-nums}
+    #radarChart,#progressChart{display:block;max-width:100%;width:100% !important;height:260px !important}
+    .slides-shell{display:grid;gap:var(--space-4)}
+    .slide-toolbar{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);flex-wrap:wrap}
+    .slides-stage{min-height:420px;display:grid;grid-template-columns:1.1fr .9fr;gap:var(--space-6);align-items:center;overflow:hidden;position:relative}
+    .slide-visual{height:100%;border-radius:var(--radius-lg);background:
+      radial-gradient(circle at 20% 20%, rgba(96,193,200,.24), transparent 24%),
+      radial-gradient(circle at 80% 30%, rgba(185,149,255,.18), transparent 22%),
+      linear-gradient(135deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border:1px solid var(--color-border);padding:var(--space-6);display:grid;place-items:center}
+    .slide-visual .mock-stack{width:100%;display:grid;gap:var(--space-3)}
+    .mock-card{height:72px;border-radius:var(--radius-lg);background:var(--color-surface);border:1px solid var(--color-border)}
+    .slide-copy h4{font-size:clamp(1.8rem,1.4rem + 1vw,2.6rem);line-height:1.04;font-family:var(--font-display);margin-bottom:var(--space-4)}
+    .slide-copy ul{display:grid;gap:var(--space-3);padding-left:1.1rem}
+    .slide-copy li{color:var(--color-text-muted)}
+    .slide-dots{display:flex;gap:var(--space-2);flex-wrap:wrap}
+    .dot{width:12px;height:12px;border-radius:50%;background:var(--color-surface-dynamic);border:1px solid var(--color-border)}
+    .dot.active{background:var(--color-primary);border-color:transparent}
+    .presentation-mode{position:fixed;inset:0;background:rgba(8,10,13,.96);z-index:300;padding:var(--space-6);display:none}
+    .presentation-mode.active{display:block}
+    .presentation-inner{height:100%;display:grid;grid-template-rows:auto 1fr auto;gap:var(--space-4)}
+    .presentation-screen{height:100%;border-radius:var(--radius-xl);background:var(--color-surface);border:1px solid var(--color-border);padding:clamp(1.5rem,2vw,2.5rem);display:grid;grid-template-columns:1.1fr .9fr;gap:var(--space-8);align-items:center}
+    .presentation-screen h3{font-family:var(--font-display);font-size:clamp(2.2rem,2rem + 1.8vw,4rem);line-height:1}
+    .presentation-screen p,.presentation-screen li{font-size:var(--text-lg);color:var(--color-text-muted)}
+    .presentation-screen ul{display:grid;gap:var(--space-4);padding-left:1.2rem}
+    .presentation-screen .big-number{font-size:clamp(3rem,3vw,5rem);font-family:var(--font-display);color:var(--color-primary)}
+    .present-bar{display:flex;justify-content:space-between;gap:var(--space-3);align-items:center}
+    .footer-note{font-size:var(--text-xs);color:var(--color-text-faint);text-align:center}
+    .mobile-menu{display:none}
+    @media (max-width: 1100px){
+      .app-shell{grid-template-columns:1fr}.sidebar{display:none}.mobile-menu{display:inline-flex}.content{padding-inline:var(--space-4)}.hero,.slides-stage,.presentation-screen{grid-template-columns:1fr}.feature-grid,.analytics-grid,.coach-grid,.grammar-grid,.dialogue-grid,.slides-grid{grid-template-columns:1fr}.span-4,.span-5,.span-6,.span-7,.span-8,.span-12{grid-column:auto}.controls{grid-template-columns:1fr 1fr}.chat-controls{grid-template-columns:1fr}.hero-stats{grid-template-columns:1fr}
+    }
+    @media (max-width: 720px){
+      .topbar{padding:var(--space-4)}.content{width:min(100vw - 1.25rem, 100%)}.hero-panel,.panel{padding:var(--space-5)}.controls{grid-template-columns:1fr}.slides-stage{min-height:unset}
+    }
+    @media (prefers-reduced-motion: reduce){*{scroll-behavior:auto !important;transition:none !important;animation:none !important}}
+  </style>
+</head>
+<body>
+  <canvas id="bg3d" aria-hidden="true"></canvas>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Primary">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" aria-label="OLIVE AI logo">
+            <path d="M10 13c7-7 21-7 28 0" />
+            <path d="M14 23c5-5 15-5 20 0" />
+            <path d="M20 33c2.7-2.7 5.3-2.7 8 0" />
+            <circle cx="24" cy="24" r="20" opacity=".28" />
+          </svg>
+        </div>
+        <div>
+          <h1>OLIVE AI</h1>
+          <p>AI-powered literacy &amp; language platform</p>
+        </div>
+      </div>
+      <nav class="nav-group">
+        <a class="nav-link active" href="#overview">Overview</a>
+        <a class="nav-link" href="#storyweaver">Storyweaver</a>
+        <a class="nav-link" href="#pronunciation">Pronunciation Coach</a>
+        <a class="nav-link" href="#grammar">Sentence Architect</a>
+        <a class="nav-link" href="#conversation">Conversational Partner</a>
+        <a class="nav-link" href="#analytics">Analytics Radar</a>
+        <a class="nav-link" href="#slides">Pitch Deck</a>
+      </nav>
+      <div class="sidebar-actions">
+        <button class="btn btn-primary" id="startPresentationBtn">Presentation mode</button>
+        <button class="btn btn-secondary" id="storyDemoBtn">Generate demo story</button>
+        <button class="btn btn-ghost" data-theme-toggle aria-label="Switch theme">Toggle theme</button>
+      </div>
+    </aside>
+    <main class="main" id="main">
+      <header class="topbar">
+        <div>
+          <h2>Premium learning, demo, and pitch in one surface</h2>
+          <p>Interactive literacy app with live coaching, grammar play, analytics, and built-in presentation mode.</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn mobile-menu" id="mobileDeckBtn" aria-label="Open presentation mode">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+          <button class="btn btn-secondary" data-theme-toggle aria-label="Switch theme">Theme</button>
+        </div>
+      </header>
+      <div class="content">
+        <section class="hero" id="overview">
+          <article class="card hero-panel">
+            <div class="hero-copy">
+              <span class="eyebrow">Literacy and Language Track</span>
+              <h3>Teach reading, speaking, grammar, and confidence with one AI-native workflow.</h3>
+              <p>OLIVE AI blends adaptive stories, visual pronunciation feedback, sentence-building games, conversational roleplay, and elegant performance analytics into a single-page experience built for judges and learners alike.</p>
+            </div>
+            <div>
+              <div class="pill-row">
+                <span class="pill">Story generation</span>
+                <span class="pill">Word tap definitions</span>
+                <span class="pill">Speech scoring</span>
+                <span class="pill">Grammar gameplay</span>
+                <span class="pill">Roleplay dialogue</span>
+                <span class="pill">Pitch mode</span>
+              </div>
+              <div class="hero-stats">
+                <div class="stat"><strong>5</strong><span>Core literacy modules</span></div>
+                <div class="stat"><strong>92%</strong><span>Demo engagement score</span></div>
+                <div class="stat"><strong>&lt; 2 min</strong><span>Judge walkthrough path</span></div>
+              </div>
+            </div>
+          </article>
+          <article class="card hero-panel">
+            <div>
+              <div class="small-label">Experience design</div>
+              <h3 style="font-size:var(--text-xl);max-width:13ch">One screen for the demo, another for the pitch.</h3>
+              <p style="color:var(--color-text-muted);margin-top:var(--space-3)">Use the app live with learners, then switch instantly into a polished deck that explains the problem, solution, market, traction story, and technology stack to the judges.</p>
+            </div>
+            <div class="slides-stage" style="min-height:220px;padding:0;border:none;background:transparent">
+              <div class="slide-visual">
+                <div class="mock-stack">
+                  <div class="mock-card"></div>
+                  <div class="mock-card" style="height:120px"></div>
+                  <div class="mock-card"></div>
+                </div>
+              </div>
+              <div class="story-inspector">
+                <dl>
+                  <dt>Track fit</dt><dd>Reading, pronunciation, grammar, and dialogue.</dd>
+                  <dt>Tech edge</dt><dd>Browser-native speech APIs and offline-friendly front-end flow.</dd>
+                  <dt>Pitch flow</dt><dd>Slides embedded directly inside the product.</dd>
+                </dl>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="feature-grid" id="storyweaver">
+          <article class="card panel span-8">
+            <h3>Adaptive AI Storyweaver</h3>
+            <p class="lead">Generate reading passages by topic, age band, and difficulty. Tap any word for meaning, translation, and pronunciation.</p>
+            <div class="controls">
+              <select id="storyTopic">
+                <option value="Space Garden">Space Garden</option>
+                <option value="Rainforest Rescue">Rainforest Rescue</option>
+                <option value="Ocean Robot">Ocean Robot</option>
+                <option value="Village Library">Village Library</option>
+              </select>
+              <select id="storyLevel">
+                <option value="beginner">Beginner</option>
+                <option value="intermediate" selected>Intermediate</option>
+                <option value="advanced">Advanced</option>
+              </select>
+              <select id="storyLanguage">
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="hi" selected>Hindi</option>
+                <option value="ta">Tamil</option>
+              </select>
+              <button class="btn btn-primary" id="generateStoryBtn">Generate story</button>
+            </div>
+            <div class="story-box">
+              <div class="story-text" id="storyText"></div>
+              <div class="story-inspector">
+                <div class="small-label">Word explorer</div>
+                <dl id="wordInspector">
+                  <dt>Word</dt><dd>Tap a highlighted word</dd>
+                  <dt>Meaning</dt><dd>See a simple definition here.</dd>
+                  <dt>Translation</dt><dd>Auto-switches with language choice.</dd>
+                  <dt>Pronunciation</dt><dd>Press speak to hear the word.</dd>
+                </dl>
+              </div>
+            </div>
+          </article>
+          <article class="card panel span-4">
+            <h3>Reading boosts</h3>
+            <p class="lead">Make the story dynamic with level-aware vocabulary and spoken playback.</p>
+            <div class="metric-row" style="display:grid;gap:var(--space-3)">
+              <div class="metric"><strong id="readingAge">8-10</strong><span>Suggested age band</span></div>
+              <div class="metric"><strong id="vocabDensity">14</strong><span>Target vocabulary words</span></div>
+              <div class="metric"><strong id="storyWords">0</strong><span>Total words</span></div>
+            </div>
+            <div style="display:grid;gap:var(--space-3);margin-top:var(--space-5)">
+              <button class="btn btn-secondary" id="readStoryBtn">Read story aloud</button>
+              <button class="btn btn-ghost" id="speakWordBtn">Speak selected word</button>
+            </div>
+          </article>
+        </section>
+
+        <section class="coach-grid" id="pronunciation">
+          <article class="card panel span-7">
+            <h3>Speech Pronunciation Coach</h3>
+            <p class="lead">Uses the browser Web Speech API when available. It compares the learner's spoken phrase against the target and colors each word for fast visual feedback.</p>
+            <div class="controls" style="grid-template-columns:1fr auto auto auto">
+              <input type="text" id="targetPhrase" value="I would like to order orange juice at the cafe" aria-label="Target phrase" />
+              <button class="btn btn-primary" id="listenBtn">Start listening</button>
+              <button class="btn btn-secondary" id="simulateBtn">Simulate result</button>
+              <button class="btn btn-ghost" id="playPhraseBtn">Play phrase</button>
+            </div>
+            <div class="feedback-box">
+              <div class="small-label">Target phrase</div>
+              <div id="phraseTokens" class="word-bank"></div>
+              <div class="small-label" style="margin-top:var(--space-5)">Speech feedback</div>
+              <p id="speechTranscript" style="color:var(--color-text-muted)">Transcript will appear here after recognition or simulation.</p>
+            </div>
+          </article>
+          <article class="card panel span-5">
+            <h3>Accuracy score</h3>
+            <p class="lead">Words that match are marked green, while misses turn red so the learner can self-correct quickly.</p>
+            <div class="score-ring" id="scoreRing" style="--score: 78"><span id="scoreValue">78%</span></div>
+            <div class="metric-row" style="display:grid;gap:var(--space-3);margin-top:var(--space-5)">
+              <div class="metric"><strong id="correctWords">7/9</strong><span>Correct words</span></div>
+              <div class="metric"><strong id="speechHint">Crisp vowels</strong><span>Instant feedback</span></div>
+            </div>
+          </article>
+        </section>
+
+        <section class="grammar-grid" id="grammar">
+          <article class="card panel span-7">
+            <h3>Grammar &amp; Sentence Architect</h3>
+            <p class="lead">Learners drag or tap scrambled words into order, submit the sentence, and receive a simple explanation of the rule behind the answer.</p>
+            <div class="small-label">Word bank</div>
+            <div class="drop-zone" id="wordBank"></div>
+            <div class="small-label" style="margin-top:var(--space-5)">Sentence builder</div>
+            <div class="drop-zone grammar-answer" id="answerZone"></div>
+            <div style="display:flex;gap:var(--space-3);margin-top:var(--space-5);flex-wrap:wrap">
+              <button class="btn btn-primary" id="checkGrammarBtn">Check syntax</button>
+              <button class="btn btn-secondary" id="resetGrammarBtn">Reset puzzle</button>
+              <button class="btn btn-ghost" id="newGrammarBtn">New prompt</button>
+            </div>
+          </article>
+          <article class="card panel span-5">
+            <h3>Rule explainer</h3>
+            <p class="lead">Scoring explains why the answer works, not just whether it is right or wrong.</p>
+            <div class="explain-box" id="grammarExplanation">
+              Build the sentence to see grammar feedback here.
+            </div>
+            <div class="metric-row" style="display:grid;gap:var(--space-3);margin-top:var(--space-5)">
+              <div class="metric"><strong id="grammarScore">0%</strong><span>Syntax accuracy</span></div>
+              <div class="metric"><strong id="grammarRule">Word order</strong><span>Current focus</span></div>
+            </div>
+          </article>
+        </section>
+
+        <section class="dialogue-grid" id="conversation">
+          <article class="card panel span-7">
+            <h3>AI Conversational Partner</h3>
+            <p class="lead">Practice realistic dialogues like cafés, airports, and interviews. Each reply can be translated and spoken aloud with text-to-speech.</p>
+            <div class="scenario-row" style="margin-bottom:var(--space-4)">
+              <button class="scenario-btn" data-scenario="cafe">Cafe</button>
+              <button class="scenario-btn" data-scenario="airport">Airport</button>
+              <button class="scenario-btn" data-scenario="interview">Interview</button>
+            </div>
+            <div class="chat-log" id="chatLog"></div>
+            <div class="chat-controls">
+              <input type="text" id="chatInput" placeholder="Type your response here" aria-label="Chat input" />
+              <button class="btn btn-primary" id="sendChatBtn">Send</button>
+              <button class="btn btn-secondary" id="speakReplyBtn">Speak last reply</button>
+            </div>
+          </article>
+          <article class="card panel span-5">
+            <h3>Translation helper</h3>
+            <p class="lead">Display the latest AI reply alongside an instant translated line for beginner support.</p>
+            <div class="feedback-box">
+              <div class="small-label">Latest translation</div>
+              <p id="translationOutput">Choose a scenario and send a line to view the translated support text.</p>
+            </div>
+            <div style="margin-top:var(--space-4)">
+              <label class="small-label" for="translationLanguage">Translate to</label>
+              <select id="translationLanguage">
+                <option value="Hindi" selected>Hindi</option>
+                <option value="Tamil">Tamil</option>
+                <option value="Spanish">Spanish</option>
+                <option value="French">French</option>
+              </select>
+            </div>
+          </article>
+        </section>
+
+        <section class="analytics-grid" id="analytics">
+          <article class="card panel span-4">
+            <h3>Analytics Radar Dashboard</h3>
+            <p class="lead">Progress cards summarize confidence, reading speed, grammar mastery, and speaking accuracy.</p>
+            <div class="metric-row" style="display:grid;gap:var(--space-3)">
+              <div class="metric"><strong>84%</strong><span>Reading confidence</span></div>
+              <div class="metric"><strong>91 wpm</strong><span>Reading speed</span></div>
+              <div class="metric"><strong>76%</strong><span>Pronunciation consistency</span></div>
+              <div class="metric"><strong>88%</strong><span>Conversation fluency</span></div>
+            </div>
+          </article>
+          <article class="card panel span-4">
+            <h3>Skill radar</h3>
+            <p class="lead">Show multi-skill growth in one clean visual for learners, teachers, and judges.</p>
+            <canvas id="radarChart" aria-label="Skill radar chart"></canvas>
+          </article>
+          <article class="card panel span-4">
+            <h3>Weekly streak</h3>
+            <p class="lead">Track momentum across story reading, pronunciation drills, and grammar missions.</p>
+            <canvas id="progressChart" aria-label="Progress line chart"></canvas>
+          </article>
+        </section>
+
+        <section class="slides-grid" id="slides">
+          <article class="card panel span-12">
+            <div class="slides-shell">
+              <div class="slide-toolbar">
+                <div>
+                  <h3>Embedded presentation slide deck</h3>
+                  <p class="lead" style="margin-bottom:0">Move from product demo to pitch deck without leaving the page.</p>
+                </div>
+                <div style="display:flex;gap:var(--space-3);flex-wrap:wrap">
+                  <button class="btn btn-secondary" id="prevSlideBtn">Previous</button>
+                  <button class="btn btn-primary" id="nextSlideBtn">Next</button>
+                  <button class="btn btn-ghost" id="openPresentationBtn">Open fullscreen deck</button>
+                </div>
+              </div>
+              <div class="slides-stage" id="slidePreview"></div>
+              <div class="slide-dots" id="slideDots"></div>
+            </div>
+          </article>
+        </section>
+
+        <p class="footer-note">Adaptive storytelling, real-time speech coaching, and interactive analytics — delivered as one polished, production-grade experience.</p>
+      </div>
+    </main>
+  </div>
+
+  <div class="presentation-mode" id="presentationMode" aria-hidden="true">
+    <div class="presentation-inner">
+      <div class="present-bar">
+        <strong>OLIVE AI — Judge Deck</strong>
+        <div style="display:flex;gap:var(--space-3)">
+          <button class="btn btn-secondary" id="presentPrevBtn">Previous</button>
+          <button class="btn btn-primary" id="presentNextBtn">Next</button>
+          <button class="btn btn-ghost" id="closePresentationBtn">Close</button>
+        </div>
+      </div>
+      <div class="presentation-screen" id="presentationScreen"></div>
+      <div class="footer-note">Use arrow keys to move through the pitch deck during the demo.</div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+      selectedWord: null,
+      currentScenario: 'cafe',
+      lastAIReply: '',
+      slideIndex: 0,
+      presentationIndex: 0,
+      currentGrammar: null
+    };
+
+    const storyLibrary = {
+      beginner: {
+        title: 'Simple discovery',
+        age: '6-8',
+        vocab: 8,
+        text: {
+          'Space Garden': 'Mira plants seeds inside a clear dome on the moon. Tiny lights glow. Warm water falls in silver drops. Soon, green leaves wave at her through the glass.',
+          'Rainforest Rescue': 'A small team walks under tall trees. They hear birds call. A baby sloth is stuck on a low branch, so the team builds a soft path and helps it climb home.',
+          'Ocean Robot': 'An ocean robot swims beside a bright fish. It finds plastic near coral and lifts it into a safe basket. The water becomes clear again.',
+          'Village Library': 'After school, Arun opens the village library. Children sit on cool floor mats and share stories. Each page teaches a new word and a new dream.'
+        }
+      },
+      intermediate: {
+        title: 'Guided adventure',
+        age: '8-10',
+        vocab: 14,
+        text: {
+          'Space Garden': 'Inside a glass habitat, Mira tested whether moon soil could support a floating herb garden. When the irrigation ring pulsed with blue light, basil and mint unfurled slowly, proving that careful design can help life thrive in unexpected places.',
+          'Rainforest Rescue': 'The student explorers followed a cracked map into the rainforest canopy station, where they discovered injured parrots tangled in discarded netting. By combining teamwork, patience, and local knowledge, they restored the nesting space before the afternoon storm arrived.',
+          'Ocean Robot': 'A learning robot drifted through the reef with sonar sensors and a gentle collection arm. Each time it detected waste near the coral, it sorted the material into separate chambers so marine biologists could study how pollution was spreading.',
+          'Village Library': 'At the village library, children gathered around a storytelling wall that changed color whenever they mastered a new word. The room became a map of curiosity, linking books, spoken language, and community pride in one joyful ritual.'
+        }
+      },
+      advanced: {
+        title: 'Analytical narrative',
+        age: '11-14',
+        vocab: 22,
+        text: {
+          'Space Garden': 'Mira\'s lunar greenhouse functioned less like a classroom experiment and more like a compact ecological system, where calibrated humidity, recycled nutrients, and adaptive LEDs cooperated to transform sterile dust into a viable agricultural prototype for long-duration habitation.',
+          'Rainforest Rescue': 'When the rescue crew reached the suspended observation deck, they recognized that the trapped wildlife reflected a wider systems failure: tourism waste, disrupted migration, and fragmented stewardship. Their intervention therefore combined immediate care with environmental education and data logging.',
+          'Ocean Robot': 'The reef robot was designed not merely to remove debris but to interpret ecological distress, correlating current movement, plastic density, and bleaching patterns so researchers could identify where restoration resources would have the highest long-term impact.',
+          'Village Library': 'What began as an evening reading circle evolved into an intergenerational language lab, where oral histories, multilingual annotations, and collaborative retellings helped learners connect literacy with identity, memory, and civic participation.'
+        }
+      }
+    };
+
+    const dictionary = {
+      Mira: {meaning: 'A curious learner and explorer.', hi: 'जिज्ञासु शिक्षार्थी', ta: 'ஆர்வமுள்ள கற்றுநர்', es: 'aprendiz curiosa', fr: 'apprenante curieuse'},
+      habitat: {meaning: 'A place designed for living.', hi: 'रहने की जगह', ta: 'வாழும் இடம்', es: 'hábitat', fr: 'habitat'},
+      irrigation: {meaning: 'A system that delivers water to plants.', hi: 'सिंचाई प्रणाली', ta: 'நீர்ப்பாசன அமைப்பு', es: 'riego', fr: 'irrigation'},
+      thrive: {meaning: 'To grow strongly and successfully.', hi: 'फलना-फूलना', ta: 'செழித்து வளர்தல்', es: 'prosperar', fr: 'prospérer'},
+      explorers: {meaning: 'People who investigate new places.', hi: 'खोजी', ta: 'ஆராய்ச்சியாளர்கள்', es: 'exploradores', fr: 'explorateurs'},
+      canopy: {meaning: 'The upper layer of a forest.', hi: 'वन की ऊपरी छत', ta: 'காட்டின் மேல் அடுக்கு', es: 'dosel', fr: 'canopée'},
+      coral: {meaning: 'Hard ocean structure built by tiny animals.', hi: 'प्रवाल', ta: 'பவளம்', es: 'coral', fr: 'corail'},
+      curiosity: {meaning: 'A strong wish to learn or know.', hi: 'जिज्ञासा', ta: 'ஆர்வம்', es: 'curiosidad', fr: 'curiosité'},
+      prototype: {meaning: 'An early model used for testing.', hi: 'प्रारूप', ta: 'மாதிரி வடிவம்', es: 'prototipo', fr: 'prototype'},
+      ecological: {meaning: 'Connected to living systems and nature.', hi: 'पारिस्थितिक', ta: 'சூழலியல்', es: 'ecológico', fr: 'écologique'}
+    };
+
+    const grammarPrompts = [
+      { tokens: ['to', 'library', 'the', 'walks', 'she', 'every', 'Saturday'], answer: 'she walks to the library every Saturday', rule: 'Subject + verb + destination + time phrase.' },
+      { tokens: ['is', 'speaking', 'clearly', 'the', 'student'], answer: 'the student is speaking clearly', rule: 'Use subject first, then helping verb, main verb, and adverb.' },
+      { tokens: ['finished', 'have', 'their', 'they', 'story'], answer: 'they have finished their story', rule: 'Present perfect uses subject + have/has + past participle.' }
+    ];
+
+    const scenarioData = {
+      cafe: {
+        opener: 'Welcome to the cafe. What would you like to order today?',
+        translation: {
+          Hindi: 'कैफे में आपका स्वागत है। आज आप क्या ऑर्डर करना चाहेंगे?',
+          Tamil: 'கஃபேக்கு வரவேற்கிறோம். இன்று நீங்கள் என்ன ஆர்டர் செய்ய விரும்புகிறீர்கள்?',
+          Spanish: 'Bienvenido al café. ¿Qué te gustaría pedir hoy?',
+          French: 'Bienvenue au café. Que souhaitez-vous commander aujourd\'hui ?'
+        },
+        replies: [
+          'Great choice. Would you like that hot or cold?',
+          'We also have a fresh pastry that pairs well with that drink.',
+          'Your order will be ready in just a moment.'
+        ]
+      },
+      airport: {
+        opener: 'Good afternoon. May I see your passport and boarding pass?',
+        translation: {
+          Hindi: 'नमस्कार। क्या मैं आपका पासपोर्ट और बोर्डिंग पास देख सकता हूँ?',
+          Tamil: 'மதிய வணக்கம். உங்கள் பாஸ்போர்ட் மற்றும் போர்டிங் பாஸை பார்க்கலாமா?',
+          Spanish: 'Buenas tardes. ¿Puedo ver su pasaporte y tarjeta de embarque?',
+          French: 'Bonjour. Puis-je voir votre passeport et votre carte d\'embarquement ?'
+        },
+        replies: [
+          'Thank you. Your gate has changed to B12.',
+          'Please place your bag on the scanner belt.',
+          'Boarding starts in twenty minutes.'
+        ]
+      },
+      interview: {
+        opener: 'Thanks for joining us today. Could you briefly introduce yourself?',
+        translation: {
+          Hindi: 'आज हमारे साथ जुड़ने के लिए धन्यवाद। क्या आप अपना संक्षिप्त परिचय दे सकते हैं?',
+          Tamil: 'இன்று எங்களுடன் இணைந்ததற்கு நன்றி. தயவுசெய்து உங்களைச் சுருக்கமாக அறிமுகப்படுத்த முடியுமா?',
+          Spanish: 'Gracias por acompañarnos hoy. ¿Podría presentarse brevemente?',
+          French: 'Merci d\'être avec nous aujourd\'hui. Pourriez-vous vous présenter brièvement ?'
+        },
+        replies: [
+          'Interesting background. What problem do you enjoy solving most?',
+          'Can you describe a project where communication mattered a lot?',
+          'That was clear and confident. Thank you.'
+        ]
+      }
+    };
+
+    const slides = [
+      {
+        title: 'The problem is bigger than textbooks',
+        bullets: ['Millions of learners need reading, speaking, and grammar help at the same time.', 'Most tools isolate one skill and break the learning flow.', 'Teachers and judges need visible progress, not just hidden model output.'],
+        visual: 'problem'
+      },
+      {
+        title: 'OLIVE AI turns language practice into one connected loop',
+        bullets: ['Adaptive Storyweaver builds comprehension and vocabulary.', 'Pronunciation Coach gives visual, immediate, browser-native speech feedback.', 'Sentence Architect and dialogue roleplay make grammar and fluency active.'],
+        visual: 'solution'
+      },
+      {
+        title: 'Why this wins the literacy track',
+        bullets: ['Strong accessibility fit: reading, hearing, speaking, and structured feedback.', 'Rich live demo: word tap definitions, color-coded pronunciation, draggable syntax game.', 'Built-in pitch mode helps teams present impact and product in one environment.'],
+        visual: 'fit'
+      },
+      {
+        title: 'Market, users, and expansion path',
+        bullets: ['Primary users: schools, language labs, NGOs, and edtech pilots.', 'Expansion path: multilingual packs, teacher dashboards, and adaptive learner profiles.', 'Monetization can combine B2B school licensing with freemium learner access.'],
+        visual: 'market'
+      },
+      {
+        title: 'Technology stack and demo advantage',
+        bullets: ['Lightweight front end built for fast, reliable deployment.', 'Web Speech API + Speech Synthesis power speaking feedback and playback.', 'Chart.js adds judge-friendly analytics without backend complexity.'],
+        visual: 'stack'
+      }
+    ];
+
+    function setTheme(nextTheme) {
+      state.theme = nextTheme;
+      document.documentElement.setAttribute('data-theme', nextTheme);
+      document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+        btn.setAttribute('aria-label', `Switch to ${nextTheme === 'dark' ? 'light' : 'dark'} mode`);
+      });
+    }
+    setTheme(state.theme);
+    document.querySelectorAll('[data-theme-toggle]').forEach(btn => btn.addEventListener('click', () => setTheme(state.theme === 'dark' ? 'light' : 'dark')));
+
+    let cachedVoices = [];
+    function refreshVoices() {
+      if ('speechSynthesis' in window) cachedVoices = window.speechSynthesis.getVoices();
+    }
+    refreshVoices();
+    if ('speechSynthesis' in window) window.speechSynthesis.onvoiceschanged = refreshVoices;
+
+    function pickFemaleVoice() {
+      if (!cachedVoices.length) refreshVoices();
+      const preferredNames = ['female', 'samantha', 'victoria', 'zira', 'susan', 'karen', 'tessa', 'moira', 'fiona', 'veena', 'allison', 'ava', 'serena', 'google us english'];
+      let voice = cachedVoices.find(v => /female/i.test(v.name));
+      if (!voice) voice = cachedVoices.find(v => preferredNames.some(name => v.name.toLowerCase().includes(name)));
+      if (!voice) voice = cachedVoices.find(v => v.lang && v.lang.startsWith('en'));
+      return voice || cachedVoices[0] || null;
+    }
+
+    function buildStory() {
+      const topic = document.getElementById('storyTopic').value;
+      const level = document.getElementById('storyLevel').value;
+      const language = document.getElementById('storyLanguage').value;
+      const pack = storyLibrary[level];
+      const text = pack.text[topic];
+      const container = document.getElementById('storyText');
+      container.innerHTML = '';
+      text.split(/\s+/).forEach(raw => {
+        const cleaned = raw.replace(/[^a-zA-Z]/g, '');
+        const btn = document.createElement('button');
+        btn.className = 'story-word';
+        btn.textContent = raw;
+        btn.type = 'button';
+        btn.addEventListener('click', () => inspectWord(cleaned || raw, language, btn));
+        container.appendChild(btn);
+      });
+      document.getElementById('readingAge').textContent = pack.age;
+      document.getElementById('vocabDensity').textContent = pack.vocab;
+      document.getElementById('storyWords').textContent = text.split(/\s+/).length;
+      inspectWord('curiosity', language, null, true);
+    }
+
+    function inspectWord(word, language, trigger = null, initial = false) {
+      if (!initial) document.querySelectorAll('.story-word').forEach(el => el.classList.remove('active'));
+      if (trigger) trigger.classList.add('active');
+      state.selectedWord = word;
+      const entry = dictionary[word] || { meaning: 'A useful story word for learners to explore in context.', hi: 'संदर्भ में समझने वाला शब्द', ta: 'சூழலில் புரிந்துகொள்ளும் சொல்', es: 'palabra para explorar en contexto', fr: 'mot à explorer dans le contexte' };
+      const label = language in entry ? entry[language] : entry.hi;
+      document.getElementById('wordInspector').innerHTML = `
+        <dt>Word</dt><dd>${word}</dd>
+        <dt>Meaning</dt><dd>${entry.meaning}</dd>
+        <dt>Translation</dt><dd>${label}</dd>
+        <dt>Pronunciation</dt><dd>${word.toLowerCase()}</dd>
+      `;
+    }
+
+    function speakText(text) {
+      if (!('speechSynthesis' in window)) return;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.96;
+      utterance.pitch = 1.04;
+      const voice = pickFemaleVoice();
+      if (voice) utterance.voice = voice;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    }
+
+    document.getElementById('generateStoryBtn').addEventListener('click', buildStory);
+    document.getElementById('storyDemoBtn').addEventListener('click', buildStory);
+    document.getElementById('readStoryBtn').addEventListener('click', () => speakText(document.getElementById('storyText').innerText));
+    document.getElementById('speakWordBtn').addEventListener('click', () => state.selectedWord && speakText(state.selectedWord));
+
+    function renderPhraseTokens(target, spoken = '') {
+      const targetWords = target.toLowerCase().split(/\s+/);
+      const spokenWords = spoken.toLowerCase().split(/\s+/);
+      const bank = document.getElementById('phraseTokens');
+      bank.innerHTML = '';
+      let correct = 0;
+      targetWords.forEach((word, idx) => {
+        const token = document.createElement('span');
+        token.className = 'token';
+        token.textContent = word;
+        if (spoken) {
+          if (spokenWords[idx] === word) {
+            token.classList.add('correct');
+            correct += 1;
+          } else {
+            token.classList.add('wrong');
+          }
+        }
+        bank.appendChild(token);
+      });
+      const score = targetWords.length ? Math.round((correct / targetWords.length) * 100) : 0;
+      document.getElementById('scoreRing').style.setProperty('--score', score);
+      document.getElementById('scoreValue').textContent = `${score}%`;
+      document.getElementById('correctWords').textContent = `${correct}/${targetWords.length}`;
+      document.getElementById('speechHint').textContent = score > 84 ? 'Excellent clarity' : score > 60 ? 'Good rhythm' : 'Try slower pacing';
+    }
+
+    function simulateSpeech() {
+      const simulated = 'I would like order orange juice at the cafe';
+      document.getElementById('speechTranscript').textContent = `Transcript: ${simulated}`;
+      renderPhraseTokens(document.getElementById('targetPhrase').value, simulated);
+    }
+
+    function startListening() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        simulateSpeech();
+        document.getElementById('speechTranscript').textContent = 'SpeechRecognition not supported here, so a demo transcript was generated.';
+        return;
+      }
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      recognition.onresult = event => {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('speechTranscript').textContent = `Transcript: ${transcript}`;
+        renderPhraseTokens(document.getElementById('targetPhrase').value, transcript);
+      };
+      recognition.onerror = () => simulateSpeech();
+      recognition.start();
+    }
+
+    document.getElementById('listenBtn').addEventListener('click', startListening);
+    document.getElementById('simulateBtn').addEventListener('click', simulateSpeech);
+    document.getElementById('playPhraseBtn').addEventListener('click', () => speakText(document.getElementById('targetPhrase').value));
+    document.getElementById('targetPhrase').addEventListener('input', e => renderPhraseTokens(e.target.value));
+
+    function loadGrammarPrompt(index = Math.floor(Math.random() * grammarPrompts.length)) {
+      state.currentGrammar = grammarPrompts[index];
+      const bank = document.getElementById('wordBank');
+      const answer = document.getElementById('answerZone');
+      bank.innerHTML = '';
+      answer.innerHTML = '';
+      [...state.currentGrammar.tokens].sort(() => Math.random() - 0.5).forEach(word => {
+        const token = document.createElement('button');
+        token.type = 'button';
+        token.className = 'token';
+        token.textContent = word;
+        token.addEventListener('click', () => moveToken(token));
+        bank.appendChild(token);
+      });
+      document.getElementById('grammarExplanation').textContent = 'Arrange the words in a meaningful order, then press Check syntax.';
+      document.getElementById('grammarScore').textContent = '0%';
+      document.getElementById('grammarRule').textContent = state.currentGrammar.rule.split(':')[0] || 'Word order';
+    }
+
+    function moveToken(token) {
+      const answerZone = document.getElementById('answerZone');
+      const wordBank = document.getElementById('wordBank');
+      (token.parentElement.id === 'wordBank' ? answerZone : wordBank).appendChild(token);
+    }
+
+    function checkGrammar() {
+      const built = [...document.getElementById('answerZone').children].map(el => el.textContent).join(' ').toLowerCase();
+      const expected = state.currentGrammar.answer.toLowerCase();
+      let score = 0;
+      if (built === expected) score = 100;
+      else {
+        const builtWords = built.split(' ');
+        const expectedWords = expected.split(' ');
+        const hits = expectedWords.filter((word, idx) => builtWords[idx] === word).length;
+        score = Math.round((hits / expectedWords.length) * 100);
+      }
+      document.getElementById('grammarScore').textContent = `${score}%`;
+      document.getElementById('grammarRule').textContent = score === 100 ? 'Rule applied' : 'Try order again';
+      document.getElementById('grammarExplanation').innerHTML = score === 100
+        ? `<strong>Correct.</strong> ${state.currentGrammar.rule}`
+        : `<strong>Almost there.</strong> Your current sentence is “${built || '...'}”. The ideal structure is “${state.currentGrammar.answer}”. ${state.currentGrammar.rule}`;
+    }
+
+    document.getElementById('checkGrammarBtn').addEventListener('click', checkGrammar);
+    document.getElementById('resetGrammarBtn').addEventListener('click', () => loadGrammarPrompt(grammarPrompts.indexOf(state.currentGrammar)));
+    document.getElementById('newGrammarBtn').addEventListener('click', () => loadGrammarPrompt());
+
+    function addBubble(text, type = 'ai') {
+      const bubble = document.createElement('div');
+      bubble.className = `bubble ${type}`;
+      bubble.innerHTML = `${text}<small>${type === 'ai' ? 'OLIVE AI' : 'Learner'}</small>`;
+      const log = document.getElementById('chatLog');
+      log.appendChild(bubble);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function setScenario(name) {
+      state.currentScenario = name;
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.style.background = btn.dataset.scenario === name ? 'var(--color-primary-highlight)' : 'var(--color-surface-2)';
+        btn.style.color = btn.dataset.scenario === name ? 'var(--color-primary)' : 'var(--color-text)';
+      });
+      document.getElementById('chatLog').innerHTML = '';
+      addBubble(scenarioData[name].opener, 'ai');
+      updateTranslation(scenarioData[name].translation[document.getElementById('translationLanguage').value]);
+      state.lastAIReply = scenarioData[name].opener;
+    }
+
+    function updateTranslation(text) {
+      document.getElementById('translationOutput').textContent = text;
+    }
+
+    function sendChat() {
+      const input = document.getElementById('chatInput');
+      const message = input.value.trim();
+      if (!message) return;
+      addBubble(message, 'user');
+      input.value = '';
+      const scenario = scenarioData[state.currentScenario];
+      const aiReply = scenario.replies[Math.floor(Math.random() * scenario.replies.length)];
+      addBubble(aiReply, 'ai');
+      state.lastAIReply = aiReply;
+      updateTranslation(scenario.translation[document.getElementById('translationLanguage').value]);
+    }
+
+    document.querySelectorAll('.scenario-btn').forEach(btn => btn.addEventListener('click', () => setScenario(btn.dataset.scenario)));
+    document.getElementById('sendChatBtn').addEventListener('click', sendChat);
+    document.getElementById('chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
+    document.getElementById('translationLanguage').addEventListener('change', () => updateTranslation(scenarioData[state.currentScenario].translation[document.getElementById('translationLanguage').value]));
+    document.getElementById('speakReplyBtn').addEventListener('click', () => state.lastAIReply && speakText(state.lastAIReply));
+
+    function renderSlide(index, targetId) {
+      const slide = slides[index];
+      const host = document.getElementById(targetId);
+      const isPresent = targetId === 'presentationScreen';
+      host.innerHTML = `
+        <div class="slide-copy">
+          <div class="small-label">Slide ${index + 1}</div>
+          <h4>${slide.title}</h4>
+          <ul>${slide.bullets.map(item => `<li>${item}</li>`).join('')}</ul>
+        </div>
+        <div class="slide-visual">
+          <div class="mock-stack">
+            <div class="mock-card" style="height:${isPresent ? '110px' : '72px'}"></div>
+            <div class="mock-card" style="height:${isPresent ? '170px' : '120px'}"></div>
+            <div class="mock-card" style="height:${isPresent ? '90px' : '72px'}"></div>
+            <div class="big-number">0${index + 1}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function syncSlides() {
+      renderSlide(state.slideIndex, 'slidePreview');
+      const dots = document.getElementById('slideDots');
+      dots.innerHTML = '';
+      slides.forEach((_, idx) => {
+        const dot = document.createElement('button');
+        dot.className = `dot ${idx === state.slideIndex ? 'active' : ''}`;
+        dot.type = 'button';
+        dot.addEventListener('click', () => { state.slideIndex = idx; syncSlides(); });
+        dots.appendChild(dot);
+      });
+      renderSlide(state.presentationIndex, 'presentationScreen');
+    }
+
+    function openPresentation() {
+      state.presentationIndex = state.slideIndex;
+      document.getElementById('presentationMode').classList.add('active');
+      document.getElementById('presentationMode').setAttribute('aria-hidden', 'false');
+      renderSlide(state.presentationIndex, 'presentationScreen');
+    }
+
+    function closePresentation() {
+      document.getElementById('presentationMode').classList.remove('active');
+      document.getElementById('presentationMode').setAttribute('aria-hidden', 'true');
+    }
+
+    document.getElementById('nextSlideBtn').addEventListener('click', () => { state.slideIndex = (state.slideIndex + 1) % slides.length; syncSlides(); });
+    document.getElementById('prevSlideBtn').addEventListener('click', () => { state.slideIndex = (state.slideIndex - 1 + slides.length) % slides.length; syncSlides(); });
+    document.getElementById('openPresentationBtn').addEventListener('click', openPresentation);
+    document.getElementById('startPresentationBtn').addEventListener('click', openPresentation);
+    document.getElementById('mobileDeckBtn').addEventListener('click', openPresentation);
+    document.getElementById('closePresentationBtn').addEventListener('click', closePresentation);
+    document.getElementById('presentNextBtn').addEventListener('click', () => { state.presentationIndex = (state.presentationIndex + 1) % slides.length; renderSlide(state.presentationIndex, 'presentationScreen'); });
+    document.getElementById('presentPrevBtn').addEventListener('click', () => { state.presentationIndex = (state.presentationIndex - 1 + slides.length) % slides.length; renderSlide(state.presentationIndex, 'presentationScreen'); });
+    window.addEventListener('keydown', e => {
+      if (!document.getElementById('presentationMode').classList.contains('active')) return;
+      if (e.key === 'ArrowRight') { state.presentationIndex = (state.presentationIndex + 1) % slides.length; renderSlide(state.presentationIndex, 'presentationScreen'); }
+      if (e.key === 'ArrowLeft') { state.presentationIndex = (state.presentationIndex - 1 + slides.length) % slides.length; renderSlide(state.presentationIndex, 'presentationScreen'); }
+      if (e.key === 'Escape') closePresentation();
+    });
+
+    function initCharts() {
+      if (!window.Chart) return;
+      const common = {
+        plugins: { legend: { labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--color-text') } } },
+        scales: {
+          r: { angleLines: { color: 'rgba(255,255,255,.08)' }, grid: { color: 'rgba(255,255,255,.08)' }, pointLabels: { color: getCss('--color-text-muted') }, ticks: { display: false }, suggestedMin: 0, suggestedMax: 100 },
+          x: { ticks: { color: getCss('--color-text-muted') }, grid: { color: 'rgba(255,255,255,.08)' } },
+          y: { ticks: { color: getCss('--color-text-muted') }, grid: { color: 'rgba(255,255,255,.08)' }, beginAtZero: true }
+        }
+      };
+      new Chart(document.getElementById('radarChart'), {
+        type: 'radar',
+        data: {
+          labels: ['Reading', 'Vocabulary', 'Pronunciation', 'Grammar', 'Fluency', 'Confidence'],
+          datasets: [{
+            label: 'Learner profile',
+            data: [84, 79, 76, 81, 88, 86],
+            borderColor: getCss('--color-primary'),
+            backgroundColor: 'rgba(96,193,200,.18)',
+            pointBackgroundColor: getCss('--color-primary'),
+            pointBorderColor: '#fff'
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: common.plugins, scales: { r: common.scales.r } }
+      });
+      new Chart(document.getElementById('progressChart'), {
+        type: 'line',
+        data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          datasets: [{
+            label: 'Practice score',
+            data: [55, 62, 67, 74, 78, 81, 89],
+            borderColor: getCss('--color-blue'),
+            backgroundColor: 'rgba(110,182,242,.12)',
+            tension: .35,
+            fill: true,
+            pointRadius: 4,
+            pointBackgroundColor: getCss('--color-blue')
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: common.plugins, scales: { x: common.scales.x, y: common.scales.y } }
+      });
+    }
+
+    function getCss(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    function initBackground3D() {
+      const canvas = document.getElementById('bg3d');
+      if (!canvas || typeof THREE === 'undefined') return;
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let renderer;
+      try {
+        renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      } catch (err) {
+        return;
+      }
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100);
+      camera.position.set(0, 0, 9);
+
+      const particleCount = window.innerWidth < 720 ? 320 : 850;
+      const positions = new Float32Array(particleCount * 3);
+      for (let i = 0; i < particleCount; i += 1) {
+        positions[i * 3] = (Math.random() - 0.5) * 28;
+        positions[i * 3 + 1] = (Math.random() - 0.5) * 18;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 20;
+      }
+      const particleGeometry = new THREE.BufferGeometry();
+      particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+      function themeColors() {
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        return isLight ? [0x01696f, 0x7a39bb] : [0x60c1c8, 0xb995ff];
+      }
+      const [colorA, colorB] = themeColors();
+
+      const particleMaterial = new THREE.PointsMaterial({ color: colorA, size: 0.055, transparent: true, opacity: 0.55, sizeAttenuation: true });
+      const particles = new THREE.Points(particleGeometry, particleMaterial);
+      scene.add(particles);
+
+      const meshA = new THREE.Mesh(
+        new THREE.IcosahedronGeometry(3.4, 1),
+        new THREE.MeshBasicMaterial({ color: colorB, wireframe: true, transparent: true, opacity: 0.2 })
+      );
+      meshA.position.set(3.6, -1.1, -5);
+      scene.add(meshA);
+
+      const meshB = new THREE.Mesh(
+        new THREE.IcosahedronGeometry(2.1, 1),
+        new THREE.MeshBasicMaterial({ color: colorA, wireframe: true, transparent: true, opacity: 0.16 })
+      );
+      meshB.position.set(-4.6, 2, -7);
+      scene.add(meshB);
+
+      function handleResize() {
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+      }
+      window.addEventListener('resize', handleResize);
+
+      function render() {
+        renderer.render(scene, camera);
+      }
+
+      function animate() {
+        particles.rotation.y += 0.0009;
+        particles.rotation.x += 0.0003;
+        meshA.rotation.x += 0.0015;
+        meshA.rotation.y += 0.002;
+        meshB.rotation.x -= 0.001;
+        meshB.rotation.y += 0.0013;
+        render();
+        if (!reduceMotion) requestAnimationFrame(animate);
+      }
+      animate();
+
+      document.querySelectorAll('[data-theme-toggle]').forEach(btn => btn.addEventListener('click', () => {
+        const [nextA, nextB] = themeColors();
+        particleMaterial.color.setHex(nextA);
+        meshA.material.color.setHex(nextB);
+        meshB.material.color.setHex(nextA);
+        if (reduceMotion) render();
+      }));
+    }
+
+    buildStory();
+    renderPhraseTokens(document.getElementById('targetPhrase').value);
+    loadGrammarPrompt(0);
+    setScenario('cafe');
+    syncSlides();
+    window.addEventListener('load', initCharts, { once: true });
+    window.addEventListener('load', initBackground3D, { once: true });
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
